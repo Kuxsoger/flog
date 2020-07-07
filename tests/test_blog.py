@@ -39,8 +39,8 @@ def test_author_required(app, client, auth):
 
 
 @pytest.mark.parametrize('path', (
-    '/2/update',
-    '/2/delete',
+    '/100/update',
+    '/100/delete',
 ))
 def test_exists_required(client, auth, path):
     auth.login()
@@ -55,7 +55,7 @@ def test_create(client, auth, app):
     with app.app_context():
         db = get_db()
         count = db.execute('SELECT COUNT(id) FROM posts').fetchone()[0]
-        assert count == 2
+        assert count == 3
 
 
 def test_update(client, auth, app):
@@ -88,3 +88,14 @@ def test_delete(client, auth, app):
         db = get_db()
         post = db.execute('SELECT * FROM posts WHERE id = 1').fetchone()
         assert post is None
+
+
+def test_detailed(client):
+    response = client.get('/2/detailed')
+    assert b'1234567890' * 10 + b'1' in response.data
+
+
+def test_read_more(client):
+    response = client.get('/')
+    assert b'1234567890' * 10 + b'1' not in response.data
+    assert b'Read more' in response.data
